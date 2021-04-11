@@ -1,9 +1,7 @@
 import numpy as np
 import random
-from PMF.data import *
-from PMF.evaluation import *
 from sklearn.model_selection import train_test_split
-
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 class pmf():
     def __init__(self,
@@ -14,7 +12,7 @@ class pmf():
                  K=10,  # K: the number of latent factor
                  learning_rate=0.001,  # learning_rate: the learning rata
                  lamda_regularizer=0.1,  # lamda_regularizer: regularization parameters
-                 max_iteration=500  # max_iteration: the max iteration
+                 max_iteration=100  # max_iteration: the max iteration
                  ):
         self.train_list = train_list
         self.test_list = test_list
@@ -24,6 +22,7 @@ class pmf():
         self.learning_rate = learning_rate
         self.lamda_regularizer = lamda_regularizer
         self.max_iteration = max_iteration
+
 
     def train(self):
         P = np.random.normal(0, 0.1, (self.N, self.K))
@@ -71,6 +70,73 @@ class pmf():
             rating_list.append(u_rating)
         r_pred = np.array(rating_list)
         return r_pred
+
+
+
+def load_data(file_dir):
+    user_ids_dict, rated_item_ids_dict = {}, {}
+    N, M, u_idx, i_idx = 0, 0, 0, 0
+    data = []
+    f = open(file_dir)
+    for line in f.readlines():
+        if '::' in line:
+            u, i, r, _ = line.split('::')
+        else:
+            u, i, r, _ = line.split()
+
+        if int(u) not in user_ids_dict:
+            user_ids_dict[int(u)] = u_idx
+            u_idx += 1
+        if int(i) not in rated_item_ids_dict:
+            rated_item_ids_dict[int(i)] = i_idx
+            i_idx += 1
+        data.append([user_ids_dict[int(u)], rated_item_ids_dict[int(i)], float(r)])
+
+    f.close()
+    N = u_idx
+    M = i_idx
+
+    return N, M, data, rated_item_ids_dict
+
+def sequence2mat(sequence, N, M):
+    records_array = np.array(sequence)
+    mat = np.zeros([N, M])
+    row = records_array[:, 0].astype(int)
+    col = records_array[:, 1].astype(int)
+    values = records_array[:, 2].astype(np.float32)
+    mat[row, col] = values
+    return mat
+
+def get_topn(r_pred, train_mat, n=10):
+    unrated_items = r_pred * (train_mat == 0)
+    idx = np.argsort(-unrated_items)
+    return idx[:, :n]
+
+def mae_rmse(r_pred, test_mat):
+    y_pred = r_pred[test_mat > 0]
+    y_true = test_mat[test_mat > 0]
+    mae = mean_absolute_error(y_true, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+    return mae, rmse
+
+def recall_precision(topn, test_mat):
+    n, m = test_mat.shape
+    hits, total_pred, total_true = 0., 0., 0.
+    for u in range(n):
+        hits += len([i for i in topn[u, :] if test_mat[u, i] > 0])
+        size_pred = len(topn[u, :])
+        size_true = np.sum(test_mat[u, :] > 0, axis=0)
+        total_pred += size_pred
+        total_true += size_true
+    recall = hits / total_true
+    precision = hits / total_pred
+    return recall, precision
+
+def evaluation(pred_mat, train_mat, test_mat):
+    topn = get_topn(pred_mat, train_mat, n=10)
+    mae, rmse = mae_rmse(pred_mat, test_mat)
+    recall, precision = recall_precision(topn, test_mat)
+    return mae, rmse, recall, precision
 
 
 data_dir = "ml-100k/u.data"
