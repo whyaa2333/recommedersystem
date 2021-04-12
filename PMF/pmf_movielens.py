@@ -45,12 +45,9 @@ class pmf():
             records_list.append(np.array([los, mae, rmse, recall, precision]))
 
             if step % 10 == 0:
-                print(' step:%d \n loss:%.4f,mae:%.4f,rmse:%.4f,recall:%.4f,precision:%.4f'
-                      % (step, los, mae, rmse, recall, precision))
+                print(' epoch:%d \n loss:%.4f,recall:%.4f,precision:%.4f' % (step / 10, los, recall, precision))
 
-        print(' end. \n loss:%.4f,mae:%.4f,rmse:%.4f,recall:%.4f,precision:%.4f'
-              % (
-              records_list[-1][0], records_list[-1][1], records_list[-1][2], records_list[-1][3], records_list[-1][4]))
+        print(' end. \n loss:%.4f,recall:%.4f,precision:%.4f' % (records_list[-1][0], records_list[-1][3], records_list[-1][4]))
         return P, Q, np.array(records_list)
 
     def update(self, p, q, r, learning_rate=0.001, lamda_regularizer=0.1):
