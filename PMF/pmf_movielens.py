@@ -28,8 +28,8 @@ class pmf():
         P = np.random.normal(0, 0.1, (self.N, self.K))
         Q = np.random.normal(0, 0.1, (self.M, self.K))
 
-        train_mat = sequence2mat(sequence=self.train_list, N=self.N, M=self.M)
-        test_mat = sequence2mat(sequence=self.test_list, N=self.N, M=self.M)
+        train_mat = seq2mat(sequence=self.train_list, N=self.N, M=self.M)
+        test_mat = seq2mat(sequence=self.test_list, N=self.N, M=self.M)
 
         records_list = []
         for step in range(self.max_iteration):
@@ -40,7 +40,7 @@ class pmf():
                                              learning_rate=self.learning_rate,
                                              lamda_regularizer=self.lamda_regularizer)
                 los += ls
-            pred_mat = self.prediction(P, Q)
+            pred_mat = self.predict(P, Q)
             mae, rmse, recall, precision = evaluation(pred_mat, train_mat, test_mat)
             records_list.append(np.array([los, mae, rmse, recall, precision]))
 
@@ -60,7 +60,7 @@ class pmf():
         loss = 0.5 * (error ** 2 + lamda_regularizer * (np.square(p).sum() + np.square(q).sum()))
         return p, q, loss
 
-    def prediction(self, P, Q):
+    def predict(self, P, Q):
         N, K = P.shape
         M, K = Q.shape
 
@@ -98,7 +98,7 @@ def load_data(file_dir):
 
     return N, M, data, rated_item_ids_dict
 
-def sequence2mat(sequence, N, M):
+def seq2mat(sequence, N, M):
     records_array = np.array(sequence)
     mat = np.zeros([N, M])
     row = records_array[:, 0].astype(int)
