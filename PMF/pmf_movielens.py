@@ -5,14 +5,14 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 class pmf():
     def __init__(self,
-                 train_list,  # train_list: train data
-                 test_list,  # test_list: test data
-                 N,  # N:the number of user
-                 M,  # M:the number of item
-                 K=10,  # K: the number of latent factor
-                 learning_rate=0.001,  # learning_rate: the learning rata
-                 lamda_regularizer=0.1,  # lamda_regularizer: regularization parameters
-                 max_iteration=100  # max_iteration: the max iteration
+                 train_list,
+                 test_list,
+                 N,
+                 M,
+                 K=10,
+                 learning_rate=0.001,
+                 lamda_regularizer=0.1,
+                 max_iteration=100
                  ):
         self.train_list = train_list
         self.test_list = test_list
@@ -149,10 +149,10 @@ model = pmf(
     test_list=test_list,
     N=N,
     M=M,
-    # K=10,  # K: the number of latent facto
-    # learning_rate=0.05,  # learning_rate: the learning rata
-    # lamda_regularizer=0.1,  # lamda_regularizer: regularization parameters
-    # max_iteration=50  # max_iteration: the max iteration
+    # K=10,
+    # learning_rate=0.05,
+    # lamda_regularizer=0.1,
+    # max_iteration=50
 )
 
 P, Q, records_array = model.train()
